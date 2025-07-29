@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>✏️ แก้ไขบันทึก</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>body { font-family: 'Noto Sans Thai', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-yellow-100 via-white to-yellow-50 py-10">
+  <div class="max-w-3xl mx-auto bg-white shadow-2xl rounded-xl p-8 border border-yellow-200">
+    <h1 class="text-3xl font-bold mb-6 text-center text-yellow-800">✏️ แก้ไขบันทึก</h1>
+
+    <div class="flex justify-between mb-4">
+      <a href="/note/list" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded shadow">📄 กลับรายการบันทึก</a>
+    </div>
+
+    <form action="/note/edit/<%= index %>" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">เลขที่บันทึก *</label>
+        <input type="text" name="registerNo" value="<%= note.registerNo %>" required class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">วันที่บันทึก</label>
+        <input type="date" name="noteDate" value="<%= note.noteDate %>" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">จาก</label>
+        <select name="from" class="w-full border rounded px-4 py-2">
+          <option value="">-- กรุณาเลือกหน่วยงาน --</option>
+          <% [
+            "สำนักปลัด", "กองคลัง", "กองช่าง", "กองสวัสดิการสังคม",
+            "กองสาธารณสุข", "หน่วยตรวจสอบภายใน", "นิติกร", "ป้องกัน",
+            "ฝ่ายนโยบายและแผน", "ฝ่ายทรัพยากรบุคคล", "ฝ่ายบริหารงานทั่วไป"
+          ].forEach(dept => { %>
+            <option value="<%= dept %>" <%= note.from === dept ? "selected" : "" %>><%= dept %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">ถึง</label>
+        <input type="text" name="to" value="<%= note.to %>" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">เรื่อง</label>
+        <input type="text" name="subject" value="<%= note.subject %>" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-yellow-900">แนบไฟล์ PDF ใหม่ (ถ้ามี)</label>
+        <input type="file" name="pdfFile" accept=".pdf" class="w-full" />
+        <% if (note.pdfFile) { %>
+          <p class="mt-2 text-sm">📎 <a href="/uploads/<%= note.pdfFile %>" class="text-blue-600 underline" target="_blank">ดูไฟล์เดิม</a></p>
+        <% } %>
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded shadow text-lg">
+          💾 บันทึกการแก้ไข
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    const form = document.querySelector("form");
+    form.addEventListener("submit", function(e) {
+      e.preventDefault();
+      Swal.fire({
+        icon: 'success',
+        title: 'บันทึกสำเร็จ!',
+        text: 'ระบบกำลังอัปเดตข้อมูล...',
+        showConfirmButton: false,
+        timer: 1500
+      }).then(() => form.submit());
+    });
+  </script>
+</body>
+</html>

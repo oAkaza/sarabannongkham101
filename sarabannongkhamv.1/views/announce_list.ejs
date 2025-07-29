@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📢 รายการประกาศ</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Noto Sans Thai', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-red-100 via-white to-pink-50 py-10">
+  <div class="max-w-6xl mx-auto px-4">
+    <h1 class="text-3xl font-bold text-center text-red-700 mb-6">📢 รายการประกาศ</h1>
+
+<div class="flex justify-between mb-6">
+  <a href="/dashboard" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded shadow">🏠 กลับเมนูหลัก</a>
+  <div class="flex gap-2">
+    <a href="/announce" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded shadow">➕ เพิ่มประกาศ</a>
+    <a href="/announce/export" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow">📁 ดาวน์โหลด Excel</a>
+  </div>
+</div>
+
+
+    <input type="text" id="searchInput" placeholder="🔍 ค้นหา..." class="w-full sm:w-1/3 px-4 py-2 border rounded shadow mb-4" onkeyup="filterTable()" />
+
+    <% if (data.length === 0) { %>
+      <p class="text-center text-gray-500">ยังไม่มีข้อมูลประกาศ</p>
+    <% } else { %>
+      <div class="overflow-x-auto">
+        <table class="table-auto w-full border text-sm text-center">
+          <thead class="bg-red-200 text-red-900">
+            <tr>
+              <th class="p-2 w-36">เลขที่ประกาศ</th>
+              <th class="p-2 w-36">เรื่อง</th>
+              <th class="p-2 w-28">วันที่</th>
+              <th class="p-2 w-36">การปฏิบัติ</th>
+              <th class="p-2 w-20">ไฟล์</th>
+              <th class="p-2 w-24">จัดการ</th>
+            </tr>
+          </thead>
+          <tbody id="dataTable">
+            <% data.forEach((item, i) => { %>
+              <tr class="even:bg-red-50">
+                <td class="p-2"><%= item.announceNo %></td>
+                <td class="p-2 text-left"><%= item.subject %></td>
+                <td class="p-2"><%= item.announceDate || '-' %></td>
+                <td class="p-2"><%= item.action || '-' %></td>
+                <td class="p-2">
+                  <% if (item.pdfFile) { %>
+                    <a href="/uploads/<%= item.pdfFile %>" class="text-blue-600 hover:underline" target="_blank">ดูไฟล์</a>
+                  <% } else { %> - <% } %>
+                </td>
+                <td class="p-2 text-center">
+  <a href="/announce/edit/<%= i %>" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded">แก้ไข</a>
+  <button
+    type="button"
+    class="btn-delete px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded"
+    data-index="<%= i %>"
+    data-docno="<%= item.announceNo %>">
+    ลบ
+  </button>
+</td>
+
+                </td>
+              </tr>
+            <% }) %>
+          </tbody>
+        </table>
+      </div>
+      <div class="flex justify-center mt-4" id="paginationControls"></div>
+    <% } %>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<script>
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const index = btn.dataset.index;
+      const docNo = btn.dataset.docno;
+
+      const { value: password } = await Swal.fire({
+        title: `ลบประกาศ (${docNo})`,
+        input: 'password',
+        inputLabel: 'กรอกรหัสผ่านเพื่อยืนยันการลบ',
+        inputPlaceholder: 'รหัสผ่าน',
+        inputAttributes: {
+          maxlength: 32,
+          autocapitalize: 'off',
+          autocorrect: 'off'
+        },
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันลบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+
+      if (password) {
+        fetch(`/announce/delete/${index}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ confirmPassword: password })
+        }).then(res => {
+          if (res.ok) {
+            Swal.fire({
+              icon: 'success',
+              title: 'ลบสำเร็จ!',
+              text: `รายการ ${docNo} ถูกลบแล้ว`,
+              timer: 2000,
+              showConfirmButton: false
+            }).then(() => location.reload());
+          } else {
+            Swal.fire({
+              icon: 'error',
+              title: 'รหัสผ่านไม่ถูกต้อง',
+              text: 'กรุณาลองใหม่อีกครั้ง'
+            });
+          }
+        });
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

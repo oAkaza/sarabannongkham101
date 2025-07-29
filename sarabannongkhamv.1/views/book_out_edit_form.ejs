@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>แก้ไขหนังสือส่ง</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>body { font-family: 'Noto Sans Thai', sans-serif; }</style>
+</head>
+<body class="bg-gradient-to-br from-yellow-100 via-white to-pink-100 py-10">
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-8 border border-yellow-200">
+    <h1 class="text-2xl font-bold text-center text-yellow-800 mb-6">✏️ แก้ไขข้อมูลหนังสือส่ง</h1>
+
+    <form action="/book-out/edit/<%= index %>" method="POST" enctype="multipart/form-data" class="space-y-4">
+
+      <div>
+        <label class="block font-semibold">เลขทะเบียนส่ง *</label>
+        <input type="text" name="registerNo" value="<%= item.registerNo %>" required class="w-full border p-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block font-semibold">ชั้นความเร็ว</label>
+        <select name="speed" class="w-full border p-2 rounded">
+          <option value="ปกติ" <%= item.speed === 'ปกติ' ? 'selected' : '' %>>ปกติ</option>
+          <option value="ด่วน" <%= item.speed === 'ด่วน' ? 'selected' : '' %>>ด่วน</option>
+          <option value="ด่วนมาก" <%= item.speed === 'ด่วนมาก' ? 'selected' : '' %>>ด่วนมาก</option>
+          <option value="ด่วนที่สุด" <%= item.speed === 'ด่วนที่สุด' ? 'selected' : '' %>>ด่วนที่สุด</option>
+        </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold">ที่</label>
+        <input type="text" name="docNo" value="<%= item.docNo %>" class="w-full border p-2 rounded" />
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block font-semibold">ลงวันที่</label>
+          <input type="date" name="docDate" value="<%= item.docDate %>" class="w-full border p-2 rounded" />
+        </div>
+        <div>
+          <label class="block font-semibold">เวลาส่งหนังสือ</label>
+          <input type="time" name="sendTime" value="<%= item.sendTime %>" class="w-full border p-2 rounded" />
+        </div>
+      </div>
+
+      <div>
+        <label class="block font-semibold">จาก</label>
+        <input type="text" name="from" value="<%= item.from %>" class="w-full border p-2 rounded" readonly />
+      </div>
+
+      <div>
+        <label class="block font-semibold">ถึง</label>
+        <input type="text" name="to" value="<%= item.to %>" class="w-full border p-2 rounded" />
+      </div>
+
+      <div>
+        <label class="block font-semibold">เรื่อง</label>
+        <input type="text" name="subject" value="<%= item.subject %>" class="w-full border p-2 rounded" />
+      </div>
+
+      <div>
+        <select name="action" class="w-full p-2 border rounded">
+        <option value="">-- การปฏิบัติ --</option>
+        <% const units = ["สำนักปลัด", "กองคลัง", "กองช่าง", "กองสวัสดิการสังคม", "กองสาธารณสุข", "หน่วยตรวจสอบภายใน", "นิติกร", "ป้องกัน", "ฝ่ายนโยบายและแผน", "ฝ่ายทรัพยากรบุคคล", "ฝ่ายบริหารงานทั่วไป"]; %>
+        <% units.forEach(unit => { %>
+          <option value="<%= unit %>" <%= item.action === unit ? 'selected' : '' %>><%= unit %></option>
+        <% }) %>
+      </select>
+      </div>
+
+      <div>
+        <label class="block font-semibold">แนบไฟล์ PDF ใหม่ (ถ้ามี)</label>
+        <input type="file" name="pdfFile" accept="application/pdf" class="w-full" />
+        <% if (item.pdfFile) { %>
+          <p class="mt-2 text-sm text-green-600">📎 ไฟล์เดิม: <a href="/uploads/<%= item.pdfFile %>" target="_blank" class="underline">เปิดไฟล์</a></p>
+        <% } %>
+      </div>
+
+      <div class="text-center pt-4">
+        <button type="submit" class="bg-yellow-600 hover:bg-yellow-700 text-white px-6 py-2 rounded font-semibold shadow">
+          💾 บันทึกการแก้ไข
+        </button>
+      </div>
+    </form>
+  </div>
+</body>
+</html>

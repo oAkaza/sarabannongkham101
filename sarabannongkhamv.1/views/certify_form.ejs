@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📄 เพิ่มหนังสือรับรอง</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-yellow-100 via-white to-amber-50 py-10">
+  <div class="max-w-3xl mx-auto bg-white shadow-xl rounded-xl p-8 border border-yellow-200">
+    <h1 class="text-3xl font-bold mb-6 text-center text-yellow-700">📄 เพิ่มหนังสือรับรอง</h1>
+
+    <div class="flex justify-between mb-4">
+      <a href="/dashboard" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded shadow">🏠 กลับเมนูหลัก</a>
+      <a href="/certify/list" class="px-4 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded shadow">📋 ดูหนังสือรับรอง</a>
+    </div>
+
+    <form id="certifyForm" action="/certify" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block mb-1 font-medium text-yellow-800">เลขที่รับรอง *</label>
+        <input type="text" name="certifyNo" required class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium text-yellow-800">เรื่อง</label>
+        <input type="text" name="subject" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium text-yellow-800">สั่ง ณ วันที่</label>
+        <input type="date" name="certifyDate" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium text-yellow-800">การปฏิบัติ</label>
+        <select name="action" class="w-full border rounded px-4 py-2">
+          <option value="">-- เลือกหน่วยงาน --</option>
+          <% [
+            "สำนักปลัด", "กองคลัง", "กองช่าง", "กองสวัสดิการสังคม",
+            "กองสาธารณสุข", "หน่วยตรวจสอบภายใน", "นิติกร", "ป้องกัน",
+            "ฝ่ายนโยบายและแผน", "ฝ่ายทรัพยากรบุคคล", "ฝ่ายบริหารงานทั่วไป"
+          ].forEach(dept => { %>
+            <option value="<%= dept %>"><%= dept %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <div>
+        <label class="block mb-1 font-medium text-yellow-800">แนบไฟล์ PDF</label>
+        <input type="file" name="pdfFile" accept=".pdf" class="w-full" />
+      </div>
+
+      <div class="text-center pt-4">
+        <button type="submit" class="px-6 py-2 bg-yellow-600 hover:bg-yellow-700 text-white rounded shadow text-lg">
+          💾 บันทึก
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById("certifyForm").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const form = e.target;
+      const formData = new FormData(form);
+
+      fetch("/certify", {
+        method: "POST",
+        body: formData
+      })
+      .then(res => res.json())
+      .then(data => {
+        Swal.fire({
+          icon: data.success ? 'success' : 'error',
+          title: data.success ? 'สำเร็จ' : 'ผิดพลาด',
+          text: data.message,
+          showConfirmButton: false,
+          timer: 1500
+        });
+        if (data.success) form.reset();
+      })
+      .catch(err => {
+        Swal.fire('เกิดข้อผิดพลาด', err.message, 'error');
+      });
+    });
+  </script>
+</body>
+</html>

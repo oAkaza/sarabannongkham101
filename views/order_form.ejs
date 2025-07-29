@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📑 ลงทะเบียนคำสั่ง</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-lime-100 via-white to-green-50 py-10">
+  <div class="max-w-3xl mx-auto bg-white shadow-2xl rounded-xl p-8 border border-green-200">
+    <h1 class="text-3xl font-bold mb-6 text-center text-green-800">📑 ลงทะเบียนคำสั่ง</h1>
+
+    <div class="flex justify-between mb-4">
+      <a href="/dashboard" class="px-4 py-2 bg-gray-500 hover:bg-gray-600 text-white rounded shadow">🏠 กลับเมนูหลัก</a>
+      <a href="/order/list" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded shadow">📄 ดูรายการคำสั่ง</a>
+    </div>
+
+    <form action="/order" method="POST" enctype="multipart/form-data" class="space-y-4">
+      <div>
+        <label class="block font-medium mb-1 text-green-900">เลขที่คำสั่ง *</label>
+        <input type="text" name="orderNo" required class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-green-900">เรื่อง</label>
+        <input type="text" name="subject" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+        <label class="block font-medium mb-1 text-green-900">สั่ง ณ วันที่</label>
+        <input type="date" name="orderDate" class="w-full border rounded px-4 py-2" />
+      </div>
+
+      <div>
+  <label class="block font-medium mb-1 text-green-900">การปฏิบัติ</label>
+  <select name="action" class="w-full border rounded px-4 py-2">
+    <option value="สำนักปลัด">สำนักปลัด</option>
+    <option value="กองคลัง">กองคลัง</option>
+    <option value="กองช่าง">กองช่าง</option>
+    <option value="กองสวัสดิการสังคม">กองสวัสดิการสังคม</option>
+    <option value="กองสาธารณสุข">กองสาธารณสุข</option>
+    <option value="หน่วยตรวจสอบภายใน">หน่วยตรวจสอบภายใน</option>
+    <option value="นิติกร">นิติกร</option>
+    <option value="ป้องกัน">ป้องกัน</option>
+    <option value="ฝ่ายนโยบายและแผน">ฝ่ายนโยบายและแผน</option>
+    <option value="ฝ่ายทรัพยากรบุคคล">ฝ่ายทรัพยากรบุคคล</option>
+    <option value="ฝ่ายบริหารงานทั่วไป">ฝ่ายบริหารงานทั่วไป</option>
+  </select>
+</div>
+
+
+      <div>
+        <label class="block font-medium mb-1 text-green-900">แนบไฟล์ PDF (ถ้ามี)</label>
+        <input type="file" name="pdfFile" accept=".pdf" class="w-full" />
+      </div>
+
+      <div class="text-center">
+        <button type="submit" class="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded shadow text-lg">
+          💾 บันทึกข้อมูล
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <script>
+  const form = document.querySelector("form");
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/order", {
+        method: "POST",
+        body: formData
+      });
+
+      const result = await res.json();
+
+      if (result.success) {
+        Swal.fire({
+          icon: 'success',
+          title: 'สำเร็จ',
+          text: result.message || 'บันทึกข้อมูลเรียบร้อยแล้ว!',
+          timer: 1500,
+          showConfirmButton: false
+        }).then(() => {
+          form.reset();
+        });
+      } else {
+        Swal.fire({
+          icon: 'error',
+          title: 'เกิดข้อผิดพลาด',
+          text: result.message || 'ไม่สามารถบันทึกข้อมูลได้!'
+        });
+      }
+
+    } catch (err) {
+      Swal.fire({
+        icon: 'error',
+        title: 'ผิดพลาด',
+        text: 'ไม่สามารถเชื่อมต่อกับเซิร์ฟเวอร์ได้'
+      });
+    }
+  });
+</script>
+
+</body>
+</html>

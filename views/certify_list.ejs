@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>📋 รายการหนังสือรับรอง</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Noto Sans Thai', sans-serif; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-sky-100 via-white to-blue-100 py-10">
+  <div class="max-w-6xl mx-auto bg-white shadow-xl rounded-xl p-8 border border-blue-200">
+    <h1 class="text-3xl font-bold text-center text-blue-800 mb-6">📋 รายการหนังสือรับรอง</h1>
+
+    <div class="flex justify-between mb-4">
+      <a href="/dashboard" class="px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded shadow">🏠 กลับเมนูหลัก</a>
+      <div class="flex gap-2">
+        <a href="/certify" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded shadow">➕ เพิ่มหนังสือรับรอง</a>
+        <a href="/certify/export" class="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded shadow">📥 ดาวน์โหลด Excel</a>
+      </div>
+    </div>
+
+    <div class="relative mb-4 max-w-md">
+  <span class="absolute left-3 top-1/2 transform -translate-y-1/2 text-xl">
+    🔍
+  </span>
+  <input
+    type="text"
+    id="searchInput"
+    placeholder="ค้นหา..."
+    onkeyup="filterData()"
+    class="w-full pl-10 pr-4 py-2 border border-blue-300 rounded shadow focus:outline-none focus:ring-2 focus:ring-blue-300"
+  />
+</div>
+
+
+    <div class="overflow-x-auto">
+      <table class="min-w-full table-auto border border-blue-300">
+        <thead class="bg-blue-200 text-blue-900">
+          <tr>
+            <th class="border px-4 py-2">เลขที่รับรอง</th>
+            <th class="border px-4 py-2">เรื่อง</th>
+            <th class="border px-4 py-2">ลงวันที่</th>
+            <th class="border px-4 py-2">การปฏิบัติ</th>
+            <th class="border px-4 py-2">PDF</th>
+            <th class="border px-4 py-2">การจัดการ</th>
+          </tr>
+        </thead>
+        <tbody id="certifyTable">
+          <% data.forEach((item, index) => { %>
+            <tr class="text-center even:bg-blue-50 row-data">
+              <td class="border px-2 py-1"><%= item.certifyNo %></td>
+              <td class="border px-2 py-1 text-left"><%= item.subject || '-' %></td>
+              <td class="border px-2 py-1"><%= item.certifyDate || '-' %></td>
+              <td class="border px-2 py-1"><%= item.action || '-' %></td>
+              <td class="border px-2 py-1">
+                <% if (item.pdfFile) { %>
+                  <a href="/uploads/<%= item.pdfFile %>" target="_blank" class="text-blue-600 underline">ดูไฟล์</a>
+                <% } else { %> - <% } %>
+              </td>
+              <td class="border px-2 py-1">
+  <div class="flex items-center justify-center gap-1">
+    <a href="/certify/edit/<%= index %>" class="px-2 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs">แก้ไข</a>
+    <button type="button"
+      class="px-2 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs btn-delete"
+      data-index="<%= index %>" data-docno="<%= item.certifyNo %>">ลบ</button>
+  </div>
+</td>
+            </tr>
+          <% }) %>
+        </tbody>
+      </table>
+    </div>
+
+    <div id="pagination" class="flex justify-center mt-6 space-x-2"></div>
+  </div>
+
+  <script>
+    const rows = document.querySelectorAll(".row-data");
+    const rowsPerPage = 20;
+    let currentPage = 1;
+
+    function displayPage(page) {
+      const start = (page - 1) * rowsPerPage;
+      const end = page * rowsPerPage;
+      rows.forEach((row, i) => {
+        row.style.display = i >= start && i < end ? "" : "none";
+      });
+    }
+
+    function setupPagination() {
+      const totalPages = Math.ceil(rows.length / rowsPerPage);
+      const pagination = document.getElementById("pagination");
+      pagination.innerHTML = "";
+
+      if (currentPage > 1) {
+        const prevBtn = document.createElement("button");
+        prevBtn.innerHTML = "« ย้อนกลับ";
+        prevBtn.className = "px-3 py-1 rounded bg-blue-400 text-white hover:bg-blue-500";
+        prevBtn.onclick = () => {
+          currentPage--;
+          displayPage(currentPage);
+          setupPagination();
+        };
+        pagination.appendChild(prevBtn);
+      }
+
+      for (let i = 1; i <= totalPages; i++) {
+        const btn = document.createElement("button");
+        btn.textContent = i;
+        btn.className = `px-3 py-1 rounded ${
+          i === currentPage ? "bg-blue-700 text-white" : "bg-blue-300 text-white hover:bg-blue-400"
+        }`;
+        btn.onclick = () => {
+          currentPage = i;
+          displayPage(currentPage);
+          setupPagination();
+        };
+        pagination.appendChild(btn);
+      }
+
+      if (currentPage < totalPages) {
+        const nextBtn = document.createElement("button");
+        nextBtn.innerHTML = "ถัดไป »";
+        nextBtn.className = "px-3 py-1 rounded bg-blue-400 text-white hover:bg-blue-500";
+        nextBtn.onclick = () => {
+          currentPage++;
+          displayPage(currentPage);
+          setupPagination();
+        };
+        pagination.appendChild(nextBtn);
+      }
+    }
+
+    function filterData() {
+      const search = document.getElementById("searchInput").value.toLowerCase();
+      rows.forEach(row => {
+        const text = row.innerText.toLowerCase();
+        row.style.display = text.includes(search) ? "" : "none";
+      });
+    }
+  document.querySelectorAll('.btn-delete').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const index = btn.dataset.index;
+      const docNo = btn.dataset.docno;
+
+      const { value: password } = await Swal.fire({
+        title: `ลบรายการ (${docNo})`,
+        input: 'password',
+        inputLabel: 'กรอกรหัสผ่านเพื่อยืนยันการลบ',
+        inputPlaceholder: 'รหัสผ่าน',
+        showCancelButton: true,
+        confirmButtonText: 'ยืนยันลบ',
+        cancelButtonText: 'ยกเลิก'
+      });
+
+      if (!password) return;
+
+      fetch(`/certify/delete/${index}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ confirmPassword: password })
+      }).then(res => {
+        if (res.ok) {
+          Swal.fire({
+            icon: 'success',
+            title: 'ลบสำเร็จ!',
+            text: `รายการ ${docNo} ถูกลบแล้ว`,
+            timer: 2000,
+            showConfirmButton: false
+          }).then(() => location.reload());
+        } else if (res.status === 403) {
+          Swal.fire({
+            icon: 'error',
+            title: 'รหัสผ่านไม่ถูกต้อง',
+            text: 'กรุณาลองใหม่อีกครั้ง'
+          });
+        } else {
+          Swal.fire({
+            icon: 'error',
+            title: 'เกิดข้อผิดพลาด',
+            text: 'ไม่สามารถลบข้อมูลได้'
+          });
+        }
+      });
+    });
+  });
+</script>
+</body>
+</html>

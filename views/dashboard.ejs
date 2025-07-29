@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai&display=swap" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Noto Sans Thai', sans-serif;
+      background: linear-gradient(to bottom right, #eef2ff, #fef9ff);
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between">
+  <div class="max-w-5xl mx-auto px-4 py-10">
+    <h1 class="text-3xl font-bold mb-10 text-center text-blue-800 drop-shadow-sm animate-fade-in">📂 ยินดีต้อนรับ, <%= user %></h1>
+    
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      <!-- เมนู Card -->
+      <a href="/book-in" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-indigo-200 to-indigo-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📥</div>
+        <div class="text-indigo-800 font-bold text-lg">หนังสือรับ</div>
+      </a>
+      <a href="/book-out" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-pink-200 to-pink-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📤</div>
+        <div class="text-pink-800 font-bold text-lg">หนังสือส่ง</div>
+      </a>
+      <a href="/note" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-yellow-200 to-yellow-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📝</div>
+        <div class="text-yellow-800 font-bold text-lg">บันทึก</div>
+      </a>
+      <a href="/announce" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-green-200 to-green-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📢</div>
+        <div class="text-green-800 font-bold text-lg">ประกาศ</div>
+      </a>
+      <a href="/order" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-red-200 to-red-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📌</div>
+        <div class="text-red-800 font-bold text-lg">คำสั่ง</div>
+      </a>
+      <a href="/certify" class="transform hover:-translate-y-1 hover:scale-105 transition-all duration-300 bg-gradient-to-tr from-cyan-200 to-cyan-100 p-6 rounded-2xl text-center shadow-lg">
+        <div class="text-3xl mb-2">📑</div>
+        <div class="text-cyan-800 font-bold text-lg">หนังสือรับรอง</div>
+      </a>
+    </div>
+  </div>
+
+<div class="mt-10 text-center">
+  <form action="/logout" method="POST">
+    <button class="px-6 py-2 bg-red-500 hover:bg-red-600 text-white text-base font-semibold rounded-full shadow-md transition-all duration-300">
+      🚪 ออกจากระบบ
+    </button>
+  </form>
+</div>
+</body>
+</html>

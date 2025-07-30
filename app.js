@@ -46,6 +46,8 @@ app.use('/announce', announceRouter); // ✅ เปลี่ยนจาก '/' 
 app.use('/certify', certifyRouter);   // ✅ คงไว้เหมือนเดิม
 
 // 🚀 Start Server
-app.listen(PORT, () => {
-  console.log(`✅ Server running at http://localhost:${PORT}`);
+const port = process.env.PORT || 3000;
+app.listen(port, () => {
+  console.log(`Server is running on port ${port}`);
 });
+

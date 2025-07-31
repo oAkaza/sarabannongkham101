@@ -46,7 +46,7 @@
               <td class="border px-2 py-1"><%= item.docDate || '-' %></td>
               <td class="border px-2 py-1 text-center">
                 <% if (item.pdfFile) { %>
-                  <a href="/book-in/preview/<%= item.pdfFile %>" target="_blank" class="text-blue-600 hover:underline">ดูไฟล์</a>
+                  <a href="<%= item.pdfFile?.viewLink %>" target="_blank" class="text-blue-600 hover:underline">ดูไฟล์</a>
                 <% } else { %> - <% } %>
               </td>
               <td class="border px-2 py-1 text-center">

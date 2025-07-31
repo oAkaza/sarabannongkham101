@@ -39,6 +39,7 @@ async function uploadToDrive(filename, filepath) {
   return file.data;
 }
 
+
 // ✅ ตั้งค่า Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
@@ -74,6 +75,12 @@ router.post('/', upload.single('pdfFile'), async (req, res) => {
       driveId: fileData.id,
       viewLink: fileData.webViewLink
     };
+
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (err) {
+      console.error('⚠️ ลบไฟล์ local ไม่สำเร็จ:', err);
+    }
   }
 
   const newEntry = {
@@ -91,6 +98,7 @@ router.post('/', upload.single('pdfFile'), async (req, res) => {
   fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
   res.send('บันทึกข้อมูลหนังสือรับเรียบร้อยแล้ว');
 });
+
 
 // ✅ รายการหนังสือรับ
 router.get('/list', (req, res) => {
@@ -128,6 +136,12 @@ router.post('/edit/:index', upload.single('pdfFile'), async (req, res) => {
       driveId: fileData.id,
       viewLink: fileData.webViewLink
     };
+
+    try {
+      fs.unlinkSync(req.file.path);
+    } catch (err) {
+      console.error('⚠️ ลบไฟล์ local ไม่สำเร็จ:', err);
+    }
   }
 
   data[index] = {
@@ -140,6 +154,7 @@ router.post('/edit/:index', upload.single('pdfFile'), async (req, res) => {
   fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
   res.redirect('/book-in/list');
 });
+
 
 // ✅ ลบรายการ
 router.post('/delete/:index', (req, res) => {

@@ -44,10 +44,16 @@ app.use('/note', noteRouter);         // ✅ เปลี่ยนจาก '/' 
 app.use('/order', orderRoute);        // ✅ เปลี่ยนจาก '/' เป็น '/order'
 app.use('/announce', announceRouter); // ✅ เปลี่ยนจาก '/' เป็น '/announce'
 app.use('/certify', certifyRouter);   // ✅ คงไว้เหมือนเดิม
+// เพิ่มนี้ก่อน listen
+app.get('/', (req, res) => {
+  res.redirect('/login'); // หรือ res.render('login')
+});
+
 
 // 🚀 Start Server
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
   console.log(`Server is running on port ${port}`);
 });
+
 

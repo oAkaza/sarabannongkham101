@@ -4,9 +4,8 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-  "start": "node app.js"
-}
-,
+    "start": "node app.js"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/oAkaza/sarabunnongkham101.git"
@@ -20,6 +19,7 @@
   },
   "homepage": "https://github.com/oAkaza/sarabunnongkham101#readme",
   "dependencies": {
-    "express": "^5.1.0"
+    "express": "^5.1.0",
+    "express-session": "^1.18.2"
   }
 }

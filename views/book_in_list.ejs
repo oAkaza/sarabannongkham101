@@ -50,10 +50,14 @@
                 <% } else { %> - <% } %>
               </td>
               <td class="border px-2 py-1 text-center">
-                <% if (item.signature && item.signature.startsWith("data:image")) { %>
-                  <img src="<%= item.signature %>" alt="ลายเซ็น" class="w-24 mx-auto rounded border">
-                <% } else { %> - <% } %>
-              </td>
+  <% if (item.driveLink) { %>
+    <a href="<%= item.driveLink %>" target="_blank" class="text-blue-600 hover:underline">ดูไฟล์จาก Drive</a>
+  <% } else if (item.pdfFile) { %>
+    <a href="/book-in/preview/<%= item.pdfFile %>" target="_blank" class="text-blue-600 hover:underline">ดูไฟล์</a>
+  <% } else { %>
+    -
+  <% } %>
+</td>
               <td class="border px-2 py-1 text-center space-x-1">
                 <a href="/book-in/edit/<%= index %>" class="px-2 py-1 bg-blue-500 hover:bg-blue-600 text-white rounded">แก้ไข</a>
                 <button

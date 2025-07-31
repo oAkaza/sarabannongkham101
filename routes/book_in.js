@@ -5,9 +5,41 @@ const fs = require('fs');
 const multer = require('multer');
 const ExcelJS = require('exceljs');
 
+// 📁 Path JSON
 const dataFile = path.join(__dirname, '../data/book_in.json');
 
-// ✅ config multer เพื่ออัปโหลดเฉพาะไฟล์ PDF
+// 📁 Path Google Drive Auth
+const { google } = require('googleapis');
+const KEYFILEPATH = path.join(__dirname, '../config/google-key.json');
+const SCOPES = ['https://www.googleapis.com/auth/drive.file'];
+
+// 📤 อัปโหลด PDF ไป Google Drive
+async function uploadToDrive(filename, filepath) {
+  const auth = new google.auth.GoogleAuth({
+    keyFile: KEYFILEPATH,
+    scopes: SCOPES,
+  });
+
+  const driveService = google.drive({ version: 'v3', auth });
+  const fileMetadata = {
+    name: filename,
+    parents: ['161d34kOPjtd0yzQsi9__sY-TB-IhtywD'],
+  };
+  const media = {
+    mimeType: 'application/pdf',
+    body: fs.createReadStream(filepath),
+  };
+
+  const file = await driveService.files.create({
+    resource: fileMetadata,
+    media: media,
+    fields: 'id, webViewLink, webContentLink',
+  });
+
+  return file.data;
+}
+
+// ✅ ตั้งค่า Multer
 const storage = multer.diskStorage({
   destination: (req, file, cb) => cb(null, 'uploads/'),
   filename: (req, file, cb) => cb(null, Date.now() + path.extname(file.originalname))
@@ -27,22 +59,31 @@ router.get('/', (req, res) => {
   res.render('book_in_form', { data });
 });
 
-// ✅ เพิ่มรายการ
-router.post('/', upload.single('pdfFile'), (req, res) => {
+// ✅ เพิ่มรายการใหม่
+router.post('/', upload.single('pdfFile'), async (req, res) => {
   const {
     registerNo, receiveDate, receiveTime, docNo, docDate,
     from, to, subject, action, signatureData
   } = req.body;
 
+  let driveFile = null;
+  if (req.file) {
+    const fileData = await uploadToDrive(req.file.originalname, req.file.path);
+    driveFile = {
+      name: req.file.originalname,
+      driveId: fileData.id,
+      viewLink: fileData.webViewLink
+    };
+  }
+
   const newEntry = {
     registerNo, receiveDate, receiveTime, docNo, docDate,
     from, to, subject, action,
-    pdfFile: req.file ? req.file.filename : null,
+    pdfFile: driveFile,
     signature: signatureData
   };
 
   let data = fs.existsSync(dataFile) ? JSON.parse(fs.readFileSync(dataFile)) : [];
-
   const isDuplicate = data.some(d => d.registerNo === registerNo);
   if (isDuplicate) return res.send('เลขทะเบียนรับนี้มีอยู่แล้ว!');
 
@@ -71,7 +112,7 @@ router.get('/edit/:index', (req, res) => {
 });
 
 // ✅ บันทึกการแก้ไข
-router.post('/edit/:index', upload.single('pdfFile'), (req, res) => {
+router.post('/edit/:index', upload.single('pdfFile'), async (req, res) => {
   const index = parseInt(req.params.index);
   const { registerNo, receiveDate, docNo, from, subject, action, signatureData } = req.body;
 
@@ -79,46 +120,38 @@ router.post('/edit/:index', upload.single('pdfFile'), (req, res) => {
   let data = JSON.parse(fs.readFileSync(dataFile));
   if (!data[index]) return res.send('ไม่พบรายการ');
 
+  let driveFile = data[index].pdfFile;
+  if (req.file) {
+    const fileData = await uploadToDrive(req.file.originalname, req.file.path);
+    driveFile = {
+      name: req.file.originalname,
+      driveId: fileData.id,
+      viewLink: fileData.webViewLink
+    };
+  }
+
   data[index] = {
     ...data[index],
     registerNo, receiveDate, docNo, from, subject, action,
     signature: signatureData,
-    pdfFile: req.file ? req.file.filename : data[index].pdfFile
+    pdfFile: driveFile
   };
 
   fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
   res.redirect('/book-in/list');
 });
 
-// ✅ ลบรายการ + ลบไฟล์ PDF ด้วย
+// ✅ ลบรายการ
 router.post('/delete/:index', (req, res) => {
   const { confirmPassword } = req.body;
   const index = parseInt(req.params.index);
 
-  if (confirmPassword !== '1234') {
-    return res.sendStatus(403); // รหัสผิด
-  }
-
-  // ❌ โค้ดเดิมที่พัง:
-  // let data = JSON.parse(fs.readFileSync(dataPath, 'utf8'));
-  // fs.writeFileSync(dataPath, JSON.stringify(data, null, 2));
-
-  // ✅ โค้ดใหม่ที่ถูกต้อง (เปลี่ยน dataPath → dataFile):
+  if (confirmPassword !== '1234') return res.sendStatus(403);
   let data = JSON.parse(fs.readFileSync(dataFile, 'utf8'));
-  const item = data[index];
-
-  if (item?.pdfFile) {
-    const filePath = path.join(__dirname, '../uploads', item.pdfFile);
-    if (fs.existsSync(filePath)) {
-      fs.unlinkSync(filePath);
-    }
-  }
-
   data.splice(index, 1);
-  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2)); // <-- ตรงนี้ด้วย
+  fs.writeFileSync(dataFile, JSON.stringify(data, null, 2));
   res.sendStatus(200);
 });
-
 
 // ✅ export Excel
 router.get('/export', (req, res) => {
@@ -143,15 +176,6 @@ router.get('/export', (req, res) => {
   res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
   res.setHeader('Content-Disposition', 'attachment; filename=book_in_export.xlsx');
   workbook.xlsx.write(res).then(() => res.end());
-});
-
-// ✅ พรีวิว PDF แบบ inline
-router.get('/preview/:filename', (req, res) => {
-  const filePath = path.join(__dirname, '../uploads', req.params.filename);
-  if (!fs.existsSync(filePath)) return res.status(404).send('ไม่พบไฟล์');
-  res.setHeader('Content-Type', 'application/pdf');
-  res.setHeader('Content-Disposition', 'inline; filename="' + req.params.filename + '"');
-  res.sendFile(filePath);
 });
 
 module.exports = router;

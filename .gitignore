@@ -1,0 +1,7 @@
+# ไม่ต้องอัปโหลดไฟล์ config ที่มีข้อมูลลับ
+config/*.json
+
+# โฟลเดอร์ที่สร้างอัตโนมัติ
+node_modules/
+.env
+uploads/
